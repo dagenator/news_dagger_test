@@ -6,6 +6,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.example.news_details.presenter.ArticleListAdapter
 import com.example.news_list.R
 import com.example.news_list.databinding.FragmentArticlesListBinding
 import kotlinx.coroutines.flow.launchIn
@@ -19,7 +20,7 @@ class FavouriteFragment : Fragment(R.layout.fragment_articles_list) {
 
     private val favouriteViewModel: FavouriteViewModel by viewModels { favouriteViewModelFactory.get() }
     private val favouriteComponentViewModel: FavouriteComponentViewModel by viewModels()
-    private var favouriteAdapter: FavouriteAdapter? = null
+    private var favouriteAdapter: ArticleListAdapter? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -29,14 +30,17 @@ class FavouriteFragment : Fragment(R.layout.fragment_articles_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.favouriteAdapter = FavouriteAdapter(View.OnClickListener {
-
-        })
+        this.favouriteAdapter = ArticleListAdapter(
+            clickOnArticle = {},
+            addToFavourite = { article -> favouriteViewModel.addArticleToFavourite(article) },
+            deleteFromFavourite = { article -> favouriteViewModel.deleteByArticle(article) },
+            null
+        )
 
         val binding = FragmentArticlesListBinding.bind(view)
         binding.list.adapter = favouriteAdapter
 
-        favouriteViewModel.articles.onEach { articles ->
+        favouriteViewModel.favouriteArticles.onEach { articles ->
             favouriteAdapter?.submitList(articles)
         }.launchIn(lifecycleScope)
     }

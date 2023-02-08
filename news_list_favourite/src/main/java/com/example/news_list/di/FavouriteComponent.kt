@@ -2,8 +2,8 @@ package com.example.news_list.di
 
 import android.app.Application
 import android.content.Context
-import com.example.core.depsProviders.FavouriteDBDeps
-import com.example.core.depsProviders.FavouriteDBDepsProvider
+import com.example.core.favourite.depsProviders.FavouriteDBDeps
+import com.example.core.favourite.depsProviders.FavouriteDBDepsProvider
 import com.example.news_api.NewsService
 import com.example.news_list.presenter.FavouriteFragment
 import dagger.Component

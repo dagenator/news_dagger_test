@@ -5,13 +5,10 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.lifecycle.Observer
 import com.example.news_api.Article
 import com.example.news_details.R
 import com.example.news_details.databinding.FragmentArticlesListBinding
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 /**
@@ -24,27 +21,40 @@ class ArticleFragment : Fragment(R.layout.fragment_articles_list) {
 
     private val articlesViewModel: ArticlesViewModel by viewModels { articleViewModelFactory.get() }
     private val newsComponentViewModel: NewsComponentViewModel by viewModels()
-    private var articleAdapter: ArticleAdapter? = null
+    private var articleAdapter: ArticleListAdapter? = null
+
+    private val favouriteListLoadObserver = Observer<List<String>> {
+        if(articleAdapter == null){
+            this.articleAdapter = ArticleListAdapter(
+                clickOnArticle = {},
+                addToFavourite = { article -> articlesViewModel.addArticleToFavourite(article); },
+                deleteFromFavourite = { article -> articlesViewModel.deleteByArticle(article); },
+                it.toHashSet()
+            )
+        }
+
+
+        articlesViewModel.getArticles()
+    }
+
+    private val articleLoadObserver = Observer<List<Article>> {
+        articleAdapter?.let{ list->
+            list.submitList(it)
+        }
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         newsComponentViewModel.articleListComponent.inject(this)
     }
 
-    fun doOnClick(a:Article){
-        articlesViewModel.addToFavourite(a);
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        this.articleAdapter = ArticleAdapter( val x-> doOnClick(x))
+        articlesViewModel.favouriteLiveData.observe(viewLifecycleOwner, favouriteListLoadObserver)
+        articlesViewModel.articles.observe(viewLifecycleOwner, articleLoadObserver)
+        articlesViewModel.getFavouriteArticles()
 
         val binding = FragmentArticlesListBinding.bind(view)
         binding.list.adapter = articleAdapter
-
-        articlesViewModel.articles.onEach { articles ->
-            articleAdapter?.submitList(articles)
-        }.launchIn(lifecycleScope)
     }
 }

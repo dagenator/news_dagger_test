@@ -13,15 +13,13 @@ data class Articles(
 @[Serializable Entity]
 data class Article(
 
-  @PrimaryKey(autoGenerate = true)
-  val id: Int?,
-
   val author: String?,
   val title: String?,
   val description: String?,
-  val url: String?,
+  @PrimaryKey
+  val url: String,
   @ColumnInfo(name = "url_to_img")
   val urlToImage: String?,
-  val content: String?,
+  val content: String?
 ){
 }

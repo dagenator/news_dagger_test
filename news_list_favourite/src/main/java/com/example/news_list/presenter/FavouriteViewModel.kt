@@ -4,23 +4,37 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.core.db.FavouriteDAO
-import com.example.news_api.NewsService
+import com.example.core.favourite.db.FavouriteDAO
+import com.example.news_api.Article
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 
 internal class FavouriteViewModel(private val favouriteDAO: FavouriteDAO) : ViewModel() {
 
-    val articles = flow {
+    val favouriteArticles = flow {
         try {
             emit(favouriteDAO.getAll())
         } catch (e: Exception) {
             Log.d(TAG, "Error", e)
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    fun addArticleToFavourite(article: Article) {
+        viewModelScope.launch {
+            favouriteDAO.add(article)
+        }
+    }
+
+    fun deleteByArticle(article: Article) {
+        viewModelScope.launch {
+            favouriteDAO.deleteByUrl(article.url ?: "")
+        }
+    }
+
 
     class Factory @Inject constructor(
         private val favouriteDAO: Provider<FavouriteDAO>

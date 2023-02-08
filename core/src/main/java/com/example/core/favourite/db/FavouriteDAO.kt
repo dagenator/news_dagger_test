@@ -1,7 +1,6 @@
-package com.example.core.db
+package com.example.core.favourite.db
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.news_api.Article
@@ -11,10 +10,15 @@ interface FavouriteDAO {
     @Query("SELECT * FROM article")
     fun getAll(): List<Article>
 
+    @Query("SELECT url FROM article")
+    fun getAllUrls(): List<String>
+
     @Insert
     fun add(vararg article: Article)
 
-    @Query("DELETE WHERE id = :id")
-    fun deleteById(id: Int)
+    @Query("DELETE FROM article WHERE url = :url")
+    fun deleteByUrl(url: String)
+
+
 
 }

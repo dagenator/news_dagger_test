@@ -1,8 +1,8 @@
 package com.example.news_dagger_test
 
 import android.app.Application
-import com.example.core.depsProviders.FavouriteDBDeps
-import com.example.core.depsProviders.FavouriteDBDepsProvider
+import com.example.core.favourite.depsProviders.FavouriteDBDeps
+import com.example.core.favourite.depsProviders.FavouriteDBDepsProvider
 import com.example.news_dagger_test.di.AppComponent
 import com.example.news_dagger_test.di.DaggerAppComponent
 import com.example.news_details.di.NewsApiDeps

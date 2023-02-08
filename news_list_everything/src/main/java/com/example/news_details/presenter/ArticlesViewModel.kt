@@ -1,15 +1,15 @@
 package com.example.news_details.presenter
 
-import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.core.db.FavouriteDAO
+import com.example.core.favourite.db.FavouriteDAO
 import com.example.news_api.Article
 import com.example.news_api.NewsService
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -18,17 +18,44 @@ internal class ArticlesViewModel(
     private val favouriteDAO: FavouriteDAO
 ) : ViewModel() {
 
-    val articles = flow {
-        try {
-            emit(newsService.everything().articles)
-        } catch (e: Exception) {
-            Log.d(TAG, "Error", e)
-        }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    val favouriteLiveData: MutableLiveData<List<String>> = MutableLiveData(emptyList())
 
-    fun addToFavourite(article: Article) {
-        favouriteDAO.add(article)
+
+    val articles = MutableLiveData<List<Article>>(emptyList())
+
+    fun getArticles() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                articles.postValue(newsService.everything().articles)
+            }
+        }
     }
+//
+
+    fun addArticleToFavourite(article: Article) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                favouriteDAO.add(article)
+            }
+        }
+    }
+
+    fun deleteByArticle(article: Article) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                favouriteDAO.deleteByUrl(article.url ?: "")
+            }
+        }
+    }
+
+    fun getFavouriteArticles() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                favouriteLiveData.postValue(favouriteDAO.getAllUrls())
+            }
+        }
+    }
+
 
     class Factory @Inject constructor(
         private val newsService: Provider<NewsService>,
